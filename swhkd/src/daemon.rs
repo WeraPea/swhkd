@@ -102,7 +102,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
             log::info!("Hotkey pressed: {:#?}", $hotkey);
             let command = $hotkey.command;
             let mut commands_to_send = String::new();
-            if modes[mode_stack[mode_stack.len() - 1]].options.oneoff {
+            if modes[mode_stack[mode_stack.len() - 1]].options.oneoff
+                || modes[mode_stack[mode_stack.len() - 1]].options.momentary
+            {
                 mode_stack.pop();
             }
             if command.contains('@') {
@@ -308,12 +310,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                     // Key release
                     0 => {
-                        if last_hotkey.is_some() && pending_release {
-                            pending_release = false;
-                            send_command!(last_hotkey.clone().unwrap(), &socket_file_path);
-                            last_hotkey = None;
-                        }
-                        if let Some(modifier) = modifiers_map.get(&key) {
+                        if last_hotkey.is_some() {
+                            if pending_release {
+                                pending_release = false;
+                                send_command!(last_hotkey.clone().unwrap(), &socket_file_path);
+                                last_hotkey = None;
+                            }
+                        } else if modes[mode_stack[mode_stack.len() - 1]].options.momentary {
+                            mode_stack.pop();
+                        }                        if let Some(modifier) = modifiers_map.get(&key) {
                             if let Some(hotkey) = &last_hotkey {
                                 if hotkey.modifiers().contains(modifier) {
                                     last_hotkey = None;

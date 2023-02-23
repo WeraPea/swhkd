@@ -67,6 +67,7 @@ pub const MODE_ENTER_STATEMENT: &str = "@enter";
 pub const MODE_ESCAPE_STATEMENT: &str = "@escape";
 pub const MODE_SWALLOW_STATEMENT: &str = "swallow";
 pub const MODE_ONEOFF_STATEMENT: &str = "oneoff";
+pub const MODE_MOMENTARY_STATEMENT: &str = "momentary";
 
 #[derive(Debug, PartialEq, Clone, Eq)]
 pub struct Config {
@@ -281,6 +282,7 @@ pub struct Mode {
 pub struct ModeOptions {
     pub swallow: bool,
     pub oneoff: bool,
+    pub momentary: bool,
 }
 
 impl Mode {
@@ -554,6 +556,7 @@ pub fn parse_contents(path: PathBuf, contents: String) -> Result<Vec<Mode>, Erro
             let mut mode = Mode::new(modename.to_string());
             mode.options.swallow = tokens.contains(&MODE_SWALLOW_STATEMENT);
             mode.options.oneoff = tokens.contains(&MODE_ONEOFF_STATEMENT);
+            mode.options.momentary = tokens.contains(&MODE_MOMENTARY_STATEMENT);
             modes.push(mode);
             current_mode = modes.len() - 1;
         }
